@@ -8,15 +8,15 @@
 // Question 0
 // Include the challenge.h header file
 //-------------------------------------------------------------------------
-
-
+#include "challenge.h"
 //-------------------------------------------------------------------------
 // Question 1
 // Declare two global variables. Both are integers named `q1A` and `q1B`, 
 // respectively. The value of `q1A` should be initialized to 0 and the value 
 // of `q1B`should be initialized to 1.
 //-------------------------------------------------------------------------
-
+int q1A = 0;
+int q1B = 1;
 
 //-------------------------------------------------------------------------
 // Question 2
@@ -24,7 +24,9 @@
 // the array should be `q2Array`. The size should be defined by a macro
 // named `Q2_ARRAY_SIZE`.
 //-------------------------------------------------------------------------
+#define Q2_ARRAY_SIZE 10
 
+int q2Array [Q2_ARRAY_SIZE];
 
 //-------------------------------------------------------------------------
 // Question 3
@@ -37,7 +39,11 @@
 //          The function should return 0b0001001101100101
 //-------------------------------------------------------------------------
 uint16_t q3(uint8_t x, uint8_t y) {
-
+    //XOR with the mask - at LSB and MSB, the bits value must be 1
+    uint8_t mask = 0b10000001;
+    x ^= mask;
+    //Only copies over 8 last bits from y, first 8 bits are already determined by x
+    return (x << 8) | y;
 }
 
 //-------------------------------------------------------------------------
@@ -50,11 +56,23 @@ uint16_t q3(uint8_t x, uint8_t y) {
 //
 // Note: The array contains 8-bit unsigned integers.
 //-------------------------------------------------------------------------
-int32_t q4(uint8_t * array, uint32_t arrayLength) {
-    for (uint8_t i = 0; i <= arrayLength; i++) {
-        int32_t sum = 0;
+int32_t q4(uint8_t * array, size_t arrayLength) {
+    //if the pointer is null, return error
+    if (array == NULL) {
+        return -1;
+    }
+
+    //should be unsigned int as well
+    uint32_t sum = 0;
+
+    //should be smaller than array length
+    //cardinality or counting variable should be size_t
+    for (size_t i = 0; i < arrayLength; i++) {
         sum += array[i];
     }
+
+    return sum;
+
 }
 
 //-------------------------------------------------------------------------
@@ -63,7 +81,10 @@ int32_t q4(uint8_t * array, uint32_t arrayLength) {
 // - uint32_t a
 // - uint16_t b
 //-------------------------------------------------------------------------
-
+typedef union {
+    uint32_t a;
+    uint16_t b;
+} q5_t;
 
 //-------------------------------------------------------------------------
 // Question 6
@@ -72,7 +93,10 @@ int32_t q4(uint8_t * array, uint32_t arrayLength) {
 // - uint32_t x
 // - uint16_t y
 //-------------------------------------------------------------------------
-
+typedef struct {
+    uint32_t x;
+    uint16_t y;
+} q6_t;
 
 //-------------------------------------------------------------------------
 // Question 7
@@ -81,14 +105,17 @@ int32_t q4(uint8_t * array, uint32_t arrayLength) {
 // - SUCCESS = 0
 // - FAIL = 1
 //-------------------------------------------------------------------------
-
+typedef enum {
+    SUCCESS = 0,
+    FAIL = 1
+} error_t;
 
 //-------------------------------------------------------------------------
 // Question 8
 // Define a macro called `MULTIPLY` that takes two parameters and multiplies
 // them together. The macro should return the result.
 //-------------------------------------------------------------------------
-
+#define MULTIPLY(X,Y) ((X)*(Y))
 
 //-------------------------------------------------------------------------
 // Question 9
@@ -102,6 +129,17 @@ int32_t q4(uint8_t * array, uint32_t arrayLength) {
 // Now, x = 10 and y = 5
 //-------------------------------------------------------------------------
 int q9(int *a, int *b) {
+    //if it is a null pointer
+    if (a == NULL || b == NULL) {
+        return -1;
+    } else {
+        int temp = *a;
+        *a = *b;
+        *b = temp;
+        return 0;
+    }
+   
+
 
 }
 
@@ -120,7 +158,15 @@ typedef struct {
 } q10_t;
 
 error_t q10(q10_t *q10) {
+    if (q10 == NULL) {
+        return FAIL;
+    }
 
+    if (q9 (&q10->a, &q10->b) == 0){
+        return SUCCESS;
+    } else {
+        return FAIL;
+    }
 }
 
 //-------------------------------------------------------------------------
@@ -143,6 +189,12 @@ typedef struct {
 } q11_b_t;
 
 error_t q11(q11_a_t *a, q11_b_t *b){
+    if (a == NULL || b == NULL) {
+        return FAIL;
+    }
+    
+    memcpy(b-> array+1,  a->array, sizeof(a->array));
+    return SUCCESS;
 
 }
 
@@ -151,7 +203,7 @@ error_t q11(q11_a_t *a, q11_b_t *b){
 // Define a macro called `MIN` that takes two parameters and finds the
 // lesser value of the 2. The macro should return the result.
 //-------------------------------------------------------------------------
-
+#define MIN(X,Y) (((X) < (Y)) ? (X) : (Y))
 //-------------------------------------------------------------------------
 // Question 13
 // Complete the following function. The function should return
@@ -162,6 +214,16 @@ error_t q11(q11_a_t *a, q11_b_t *b){
 //-------------------------------------------------------------------------
 
 void *q13(uint32_t *ptr1, uint16_t *ptr2){
+
+    //don't return the address of a local variable
+
+    if ((ptr1 == NULL) || (ptr2 == NULL)) {
+        //typecast void pointer to be of type int
+        return (void *) -1;
+    }
+
+
+    return (void *) MIN((uint8_t *)ptr1 + 5, (uint8_t *)ptr2 + 5);
 
 }
 //-------------------------------------------------------------------------
@@ -264,9 +326,11 @@ int main(void) {
     ASSERT(MIN(2.1, 2.2) == 2.1);
     ASSERT(MIN(52, 2) == 2);
     ASSERT(MIN(5, 5) == 5);
+     printf("Working?");
 
     uint32_t *ptr1 = (uint32_t *) 0x10;
     uint16_t *ptr2 = (uint16_t *) 0x12;
+   
     ASSERT(q13(ptr1, ptr2) == (void *)0x15);
     ptr1 = (uint32_t *) 0x3129;
     ptr2 = (uint16_t *) 0x3124;
